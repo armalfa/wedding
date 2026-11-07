@@ -321,28 +321,32 @@
  <form id="rsvpForm">
  <div class="form-group">
  <label class="form-label" for="guestName">Ваше Имя и Фамилия</label>
- <input type="text" id="guestName" name="guestName" required placeholder="Например, Александр Петров">
+ <input type="text" id="guestName" name="Имя_гостя" required placeholder="Например, Александр Петров">
  </div>
 
  <div class="form-group">
  <label class="form-label">Сможете ли вы присутствовать?</label>
  <div class="radio-group">
  <label class="radio-label">
- <input type="radio" name="attendance" value="С удовольствием приду" checked> С удовольствием приду
+ <input type="radio" name="Статус" value="С удовольствием приду" checked> С удовольствием приду
  </label>
  <label class="radio-label">
- <input type="radio" name="attendance" value="Приду с парой (+1)"> Приду с парой (+1)
+ <input type="radio" name="Статус" value="Приду с парой (+1)"> Приду с парой (+1)
  </label>
  <label class="radio-label">
- <input type="radio" name="attendance" value="К сожалению, не смогу"> К сожалению, не смогу
+ <input type="radio" name="Статус" value="К сожалению, не смогу"> К сожалению, не смогу
  </label>
  </div>
  </div>
 
  <div class="form-group">
  <label class="form-label" for="guestWishes">Пожелания или предпочтения по напиткам</label>
- <textarea id="guestWishes" name="guestWishes" rows="3" placeholder="Например: предпочитаю сухое красное вино..."></textarea>
+ <textarea id="guestWishes" name="Пожелания" rows="3" placeholder="Например: предпочитаю сухое красное вино..."></textarea>
  </div>
+
+ <!-- Скрытые настройки для отправки на почту (или уведомления) -->
+ <input type="hidden" name="_subject" value=" Новый ответ на приглашение!">
+ <input type="text" name="_gotcha" style="display:none">
 
  <button type="submit" class="submit-btn" id="submitBtn">Отправить ответ</button>
  <div class="success-message" id="successMessage">Спасибо! Ваш ответ успешно отправлен организаторам.</div>
@@ -372,34 +376,27 @@
  setInterval(updateCountdown, 1000);
  updateCountdown();
 
- // Отправка формы в Telegram
- const BOT_TOKEN = '9254663905:AAGumG5Amq5ipa2gHShejh0x1CP1a4e2wxM';
- const CHAT_ID = '1978162636';
+ // Отправка формы через защищенный сервис FormSubmit на вашу почту
+ // (Укажите вашу почту вместо isip_a.b.noroyan@mpt.ru если хотите получать на другую)
+ const form = document.getElementById('rsvpForm');
+ form.action = 'https://formsubmit.co/isip_a.b.noroyan@mpt.ru';
+ form.method = 'POST';
 
- document.getElementById('rsvpForm').addEventListener('submit', function(e) {
+ form.addEventListener('submit', function(e) {
  e.preventDefault();
-
- const name = document.getElementById('guestName').value;
- const attendance = document.querySelector('input[name="attendance"]:checked').value;
- const wishes = document.getElementById('guestWishes').value || 'Нет пожеланий';
-
- const message = ` Новый ответ на свадьбу!\n\n Имя: ${name}\n Статус: ${attendance}\n Пожелания: ${wishes}`;
-
+ 
  const btn = document.getElementById('submitBtn');
  btn.innerText = 'Отправка...';
  btn.disabled = true;
 
- fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+ fetch(form.action, {
  method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- chat_id: CHAT_ID,
- text: message
- })
+ body: new FormData(form),
+ headers: { 'Accept': 'application/json' }
  })
  .then(response => {
  if (response.ok) {
- document.getElementById('rsvpForm').reset();
+ form.reset();
  document.getElementById('successMessage').style.display = 'block';
  btn.style.display = 'none';
  } else {
@@ -409,7 +406,7 @@
  }
  })
  .catch(error => {
- alert('Ошибка соединения. Проверьте интернет.');
+ alert('Ошибка соединения.');
  btn.innerText = 'Отправить ответ';
  btn.disabled = false;
  });
