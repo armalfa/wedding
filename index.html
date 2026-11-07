@@ -286,4 +286,134 @@
  <h2>Ждем вас!</h2>
  <p>Мы будем счастливы разделить этот особенный день с самыми близкими людьми. Ваше присутствие сделает наш праздник незабываемым.</p>
  <div class="divider" style="width: 20px; margin: 20px auto;"></div>
- <p style="text-transform: uppercase
+ <p style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; color: var(--accent-color);">Место проведения</p>
+ <div class="location-details">Ресторан Imperial, г. Гюмри</div>
+ </div>
+
+ <!-- Программа -->
+ <div class="card">
+ <h2>Программа дня</h2>
+ <ul class="timeline">
+ <li>
+ <time>15:00</time>
+ <span>Сбор гостей и welcome-drink</span>
+ </li>
+ <li>
+ <time>16:00</time>
+ <span>Церемония бракосочетания</span>
+ </li>
+ <li>
+ <time>17:00</time>
+ <span>Праздничный банкет</span>
+ </li>
+ <li>
+ <time>21:00</time>
+ <span>Свадебный торт и завершение вечера</span>
+ </li>
+ </ul>
+ </div>
+
+ <!-- Форма RSVP -->
+ <div class="card">
+ <h2>Подтверждение присутствия</h2>
+ <p>Пожалуйста, подтвердите ваше участие до 20 декабря 2026 года.</p>
+ 
+ <form id="rsvpForm">
+ <div class="form-group">
+ <label class="form-label" for="guestName">Ваше Имя и Фамилия</label>
+ <input type="text" id="guestName" name="guestName" required placeholder="Например, Александр Петров">
+ </div>
+
+ <div class="form-group">
+ <label class="form-label">Сможете ли вы присутствовать?</label>
+ <div class="radio-group">
+ <label class="radio-label">
+ <input type="radio" name="attendance" value="С удовольствием приду" checked> С удовольствием приду
+ </label>
+ <label class="radio-label">
+ <input type="radio" name="attendance" value="Приду с парой (+1)"> Приду с парой (+1)
+ </label>
+ <label class="radio-label">
+ <input type="radio" name="attendance" value="К сожалению, не смогу"> К сожалению, не смогу
+ </label>
+ </div>
+ </div>
+
+ <div class="form-group">
+ <label class="form-label" for="guestWishes">Пожелания или предпочтения по напиткам</label>
+ <textarea id="guestWishes" name="guestWishes" rows="3" placeholder="Например: предпочитаю сухое красное вино..."></textarea>
+ </div>
+
+ <button type="submit" class="submit-btn" id="submitBtn">Отправить ответ</button>
+ <div class="success-message" id="successMessage">Спасибо! Ваш ответ успешно отправлен организаторам.</div>
+ </form>
+ </div>
+
+ <footer>
+ С любовью, Сережа и Евгения · 2027
+ </footer>
+ </div>
+
+ <script>
+ // Таймер обратного отсчета до 11 января 2027 года
+ const weddingDate = new Date('2027-01-11T15:00:00').getTime();
+
+ function updateCountdown() {
+ const now = new Date().getTime();
+ const distance = weddingDate - now;
+
+ if (distance < 0) return;
+
+ document.getElementById('days').innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0');
+ document.getElementById('hours').innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+ document.getElementById('minutes').innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+ document.getElementById('seconds').innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+ }
+ setInterval(updateCountdown, 1000);
+ updateCountdown();
+
+ // Отправка формы в Telegram
+ const BOT_TOKEN = '9254663905:AAGumG5Amq5ipa2gHShejh0x1CP1a4e2wxM';
+ const CHAT_ID = '1978162636';
+
+ document.getElementById('rsvpForm').addEventListener('submit', function(e) {
+ e.preventDefault();
+
+ const name = document.getElementById('guestName').value;
+ const attendance = document.querySelector('input[name="attendance"]:checked').value;
+ const wishes = document.getElementById('guestWishes').value || 'Нет пожеланий';
+
+ const message = ` Новый ответ на свадьбу!\n\n Имя: ${name}\n Статус: ${attendance}\n Пожелания: ${wishes}`;
+
+ const btn = document.getElementById('submitBtn');
+ btn.innerText = 'Отправка...';
+ btn.disabled = true;
+
+ fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({
+ chat_id: CHAT_ID,
+ text: message
+ })
+ })
+ .then(response => {
+ if (response.ok) {
+ document.getElementById('rsvpForm').reset();
+ document.getElementById('successMessage').style.display = 'block';
+ btn.style.display = 'none';
+ } else {
+ alert('Ошибка отправки. Попробуйте еще раз.');
+ btn.innerText = 'Отправить ответ';
+ btn.disabled = false;
+ }
+ })
+ .catch(error => {
+ alert('Ошибка соединения. Проверьте интернет.');
+ btn.innerText = 'Отправить ответ';
+ btn.disabled = false;
+ });
+ });
+ </script>
+</body>
+</html>
